@@ -13,9 +13,7 @@
 #include "mem_pool.h"
 
 /*************/
-/*           */
 /* Constants */
-/*           */
 /*************/
 static const float      MEM_FILL_FACTOR                 = 0.75;
 static const unsigned   MEM_EXPAND_FACTOR               = 2;
@@ -35,9 +33,7 @@ static const unsigned   MEM_GAP_IX_EXPAND_FACTOR        = 2;
 
 
 /*********************/
-/*                   */
 /* Type declarations */
-/*                   */
 /*********************/
 typedef struct _alloc {
     char *mem;
@@ -68,9 +64,7 @@ typedef struct _pool_mgr {
 
 
 /***************************/
-/*                         */
 /* Static global variables */
-/*                         */
 /***************************/
 static pool_mgr_pt *pool_store = NULL; // an array of pointers, only expand
 static unsigned pool_store_size = 0;
@@ -79,9 +73,7 @@ static unsigned pool_store_capacity = 0;
 
 
 /********************************************/
-/*                                          */
 /* Forward declarations of static functions */
-/*                                          */
 /********************************************/
 static alloc_status _mem_resize_pool_store();
 static alloc_status _mem_resize_node_heap(pool_mgr_pt pool_mgr);
@@ -100,9 +92,7 @@ static alloc_status _mem_invalidate_gap_ix(pool_mgr_pt pool_mgr);
 
 
 /****************************************/
-/*                                      */
 /* Definitions of user-facing functions */
-/*                                      */
 /****************************************/
 alloc_status mem_init() {
     // ensure that it's called only once until mem_free
@@ -118,7 +108,6 @@ alloc_status mem_init() {
         pool_store_capacity = MEM_POOL_STORE_INIT_CAPACITY;
         return ALLOC_OK; //memory is properly allocated
     }}
-
 alloc_status mem_free() {
     // ensure that it's called only once for each mem_init
     // make sure all pool managers have been deallocated
@@ -142,7 +131,6 @@ alloc_status mem_free() {
 
     return ALLOC_OK;
 }
-
 pool_pt mem_pool_open(size_t size, alloc_policy policy) {
     // make sure there the pool store is allocated
     // expand the pool store, if necessary
@@ -279,10 +267,8 @@ alloc_status mem_pool_close(pool_pt pool) {
 }
 
 void * mem_new_alloc(pool_pt pool, size_t size) {
-    
     // get mgr from pool by casting the pointer to (pool_mgr_pt)
     pool_mgr_pt new_pmgr = (pool_mgr_pt) (pool);
-    
     // check if any gaps, return null if none
     if (new_pmgr->pool.num_gaps == 0) {
         return NULL; //no gaps
@@ -296,7 +282,7 @@ void * mem_new_alloc(pool_pt pool, size_t size) {
     if (new_pmgr->used_nodes >= new_pmgr->total_nodes) { //as a note, I'm unsure if it should be ">" or ">=" but the verbage used implies the second. 
         return NULL;
     }
-    
+ 
     node_pt new_alloc = NULL;
     if (pool->policy == FIRST_FIT) {
         
