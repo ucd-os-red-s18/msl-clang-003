@@ -3,7 +3,7 @@
  * Edited: Ryan McOmber 2/11/18
  * Only this will be committed to the repository since it is the only thing that is graded (according to the assignment ReadME)
  * Couldn't test this, will do so in the future (computer (and likely user) error)
- * Obviously, this means stress test is gonna be hard to do.
+ * 
  */
 
 #include <stdlib.h>
@@ -48,7 +48,7 @@ typedef struct _node {
     alloc_t alloc_record;
     unsigned used;
     unsigned allocated;
-    struct _node *next, *prev; // doubly-linked list for gap deletion
+    struct _node *next, *prev; // doubly-linked list
 } node_t, *node_pt;
 
 typedef struct _gap {
@@ -116,7 +116,7 @@ alloc_status mem_init() {
         // allocate pool store with starting capacity
         pool_store = (pool_mgr_pt*) calloc(MEM_POOL_STORE_INIT_CAPACITY, sizeof(pool_mgr_pt));
         pool_store_capacity = MEM_POOL_STORE_INIT_CAPACITY;
-        return ALLOC_OK; // says memory is allocated
+        return ALLOC_OK; //memory is properly allocated
     }}
 
 alloc_status mem_free() {
@@ -124,13 +124,10 @@ alloc_status mem_free() {
     // make sure all pool managers have been deallocated
     // can free the pool store array
     // update static variables
-    // ensure that it's called only once for each mem_init
     // if pool_store == NULL then ^ is not true 
     if (pool_store == NULL) {
         return ALLOC_FAIL;
     }
-    // make sure all pool managers are deallocated
-    // if an entry in the pool store is not null, not OK
     for (int i = 0; i < pool_store_size; ++i) {
         if (pool_store[i] != NULL) {
             return ALLOC_FAIL;
@@ -322,11 +319,10 @@ void * mem_new_alloc(pool_pt pool, size_t size) {
         
     } else if (pool->policy == BEST_FIT) {
         
-        // gaps will be sorted according to size available
+        // gaps sorted according to size 
         for (int i = 0; i < pool->num_gaps; ++i) {
             if (size <= new_pmgr->gap_ix[i].size) { // found gap
                 new_alloc = new_pmgr->gap_ix[i].node;
-                // use new_alloc->allocated to signal success below
                 new_alloc->allocated = 1;
                 break;
             }
@@ -580,9 +576,9 @@ static alloc_status _mem_resize_node_heap(pool_mgr_pt pool_mgr) {
 }
 
 static alloc_status _mem_resize_gap_ix(pool_mgr_pt pool_mgr) {
-    if (((float) pool_mgr->gap_ix->size / pool_mgr->gap_ix_capacity) >=
+    if (( (float) pool_mgr->gap_ix->size / pool_mgr->gap_ix_capacity) >=
             MEM_GAP_IX_FILL_FACTOR) {
-        pool_mgr->gap_ix = realloc(pool_mgr->gap_ix, (size_t) (pool_mgr->gap_ix_capacity *
+        pool_mgr->gap_ix = realloc(pool_mgr->gap_ix, (size_t)(pool_mgr->gap_ix_capacity *
                                                                MEM_GAP_IX_EXPAND_FACTOR * sizeof(pool_mgr_pt)));
         pool_mgr->gap_ix_capacity = pool_mgr->gap_ix_capacity * MEM_GAP_IX_EXPAND_FACTOR;
         printf("Resizing gap index\n");
