@@ -241,29 +241,29 @@ alloc_status mem_pool_close(pool_pt pool) {
     }
     // free memory pool
     free(new_pmgr->pool.mem);
-    new_pmgr->pool.mem = NULL;
+    new_pmgr->pool.mem = NULL; //null out
 
     // free node heap
     free(new_pmgr->node_heap);
-    new_pmgr->node_heap = NULL;
+    new_pmgr->node_heap = NULL; //null out
 
     // free gap index
     free(new_pmgr->gap_ix);
-    new_pmgr->gap_ix = NULL;
+    new_pmgr->gap_ix = NULL; //null out
 
     // find mgr in pool store and set to null
     for(int i = 0; i < pool_store_size; ++i) {
         if (pool_store[i] == new_pmgr) {
-            pool_store[i] = NULL;
-            pool_store_size++;
+            pool_store[i] = NULL; //null out    
+            pool_store_size++; //increment
             break;
         }
     }
     // note: don't decrement pool_store_size, because it only grows
     // free mgr
     free(new_pmgr);
-    new_pmgr = NULL;
-    return ALLOC_OK;
+    new_pmgr = NULL; //null out
+    return ALLOC_OK; //allocated
 }
 
 void * mem_new_alloc(pool_pt pool, size_t size) {
@@ -285,8 +285,7 @@ void * mem_new_alloc(pool_pt pool, size_t size) {
  
     node_pt new_alloc = NULL;
     if (pool->policy == FIRST_FIT) {
-        
-        //assumes node_heap[0] is head (Which it should be)
+        //1st in node_heap is head (hopefully)
         new_alloc = new_pmgr->node_heap;
         for (int i = 0; i < new_pmgr->total_nodes; ++i) {
             // Used: 1, Allocated: 0 is gap
@@ -298,7 +297,7 @@ void * mem_new_alloc(pool_pt pool, size_t size) {
             }
             
             new_alloc = new_alloc->next;
-            if (new_alloc == NULL) {
+            if (new_alloc == NULL) { //next is null
                 return NULL;
             }
         }
@@ -309,7 +308,7 @@ void * mem_new_alloc(pool_pt pool, size_t size) {
         for (int i = 0; i < pool->num_gaps; ++i) {
             if (size <= new_pmgr->gap_ix[i].size) { // found gap
                 new_alloc = new_pmgr->gap_ix[i].node;
-                new_alloc->allocated = 1;
+                new_alloc->allocated = 1; //signifies a gap
                 break;
             }
         }
