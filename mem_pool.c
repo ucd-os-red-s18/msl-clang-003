@@ -1,5 +1,9 @@
 /*
  * Created by Ivo Georgiev on 2/9/16.
+ * Edited: Ryan McOmber 2/11/18
+ * Only this will be committed to the repository since it is the only thing that is graded (according to the assignment ReadME)
+ * Couldn't test this, will do so in the future (computer (and likely user) error)
+ * Obviously, this means stress test is gonna be hard to do.
  */
 
 #include <stdlib.h>
@@ -104,15 +108,42 @@ alloc_status mem_init() {
     // ensure that it's called only once until mem_free
     // allocate the pool store with initial capacity
     // note: holds pointers only, other functions to allocate/deallocate
-
-    return ALLOC_FAIL;
-}
+    if (pool_store != NULL) {
+        // if != NULL, mem_init() was called (again) before mem_free
+            return ALLOC_FAIL;
+    }
+    else {
+        // allocate pool store with starting capacity
+        pool_store = (pool_mgr_pt*) calloc(MEM_POOL_STORE_INIT_CAPACITY, sizeof(pool_mgr_pt));
+        pool_store_capacity = MEM_POOL_STORE_INIT_CAPACITY;
+        return ALLOC_OK; // says memory is allocated
+    }}
 
 alloc_status mem_free() {
     // ensure that it's called only once for each mem_init
     // make sure all pool managers have been deallocated
     // can free the pool store array
     // update static variables
+    // ensure that it's called only once for each mem_init
+    // if pool_store == NULL then ^ is not true 
+    if (pool_store == NULL) {
+        return ALLOC_FAIL;
+    }
+    // make sure all pool managers are deallocated
+    // if an entry in the pool store is not null, not OK
+    for (int i = 0; i < pool_store_size; ++i) {
+        if (pool_store[i] != NULL) {
+            return ALLOC_FAIL;
+        }
+    }
+    //Now we move on to free 
+    free(pool_store);
+    //Update/replace static variables, zero/null as necessary
+    pool_store_capacity = 0;
+    pool_store_size = 0;
+    pool_store = NULL;
+
+    return ALLOC_OK;
 
     return ALLOC_FAIL;
 }
@@ -120,11 +151,33 @@ alloc_status mem_free() {
 pool_pt mem_pool_open(size_t size, alloc_policy policy) {
     // make sure there the pool store is allocated
     // expand the pool store, if necessary
+    if (pool_store == NULL) { 
+        //no pool_store allocated
+        return NULL;
+    }
+     alloc_status ret_status = _mem_resize_pool_store();
+     assert(ret_status == ALLOC_OK); //end program if alloc not OK
+     if (ret_status != ALLOC_OK) {
+         return NULL; //pool store needs expanding
+     }
     // allocate a new mem pool mgr
-    // check success, on error return null
+    pool_mgr_pt new_pmgr = (pool_mgr_pt) calloc(1, sizeof(pool_mgr_t));
+    //check that it works
+    assert(new_pmgr);
+    if (new_pmgr == NULL) {
+        return NULL; //didnt work, return NULL
+    }
     // allocate a new memory pool
+    void * new_mem = malloc(size);
     // check success, on error deallocate mgr and return null
+    new_pmgr->pool.mem = new_mem;   //size bytes
+    new_pmgr->pool.policy = policy;
+    new_pmgr->pool.total_size = size;
+    new_pmgr->pool.num_allocs = 0;  // no nodes should have been allocated
+    new_pmgr->pool.num_gaps = 1;    // This is a guess
+    new_pmgr->pool.alloc_size = 0;  // pool shouldn't have anything
     // allocate a new node heap
+    assert(new_pmgr->pool.mem);
     // check success, on error deallocate mgr/pool and return null
     // allocate a new gap index
     // check success, on error deallocate mgr/pool/heap and return null
