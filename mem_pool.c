@@ -144,8 +144,6 @@ alloc_status mem_free() {
     pool_store = NULL;
 
     return ALLOC_OK;
-
-    return ALLOC_FAIL;
 }
 
 pool_pt mem_pool_open(size_t size, alloc_policy policy) {
@@ -297,7 +295,7 @@ void * mem_new_alloc(pool_pt pool, size_t size) {
     assert(result == ALLOC_OK);
     if (ret_status != ALLOC_OK) {
          return NULL;
-    // check used nodes fewer than total nodes, quit on error
+    // check used nodes less than/= total nodes, quit on error
     if (new_pmgr->used_nodes >= new_pmgr->total_nodes) { //as a note, I'm unsure if it should be ">" or ">=" but the verbage used implies the second. 
         return NULL;
     }
