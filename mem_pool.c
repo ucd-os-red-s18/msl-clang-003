@@ -527,7 +527,7 @@ static alloc_status _mem_resize_pool_store() {
         pool_store = realloc(pool_store, (size_t) (pool_store_capacity *
                 MEM_POOL_STORE_FILL_FACTOR * sizeof(pool_mgr_pt)));
         pool_store_capacity = pool_store_capacity * MEM_POOL_STORE_EXPAND_FACTOR;
-        printf("Resizing pool store\n");
+        printf("Resized pool store\n");
     }
     return ALLOC_OK;
 }
@@ -537,7 +537,7 @@ static alloc_status _mem_resize_node_heap(pool_mgr_pt pool_mgr) {
     if (((float) pool_mgr->used_nodes / pool_mgr->total_nodes) >= MEM_NODE_HEAP_FILL_FACTOR) 
     {
         //clear gap index
-        printf("Resizing node heap\n");
+        printf("Resized node heap\n");
         _mem_invalidate_gap_ix(pool_mgr);
         
         // allocate a new, expanded node heap
@@ -549,12 +549,7 @@ static alloc_status _mem_resize_node_heap(pool_mgr_pt pool_mgr) {
         
         // allocate the head pointer to easily copy over at the end
         node_pt head_node = new_heap;
-        
-        /*
-         * Now we traverse the new and old node_heaps and
-         * copy over each node one at a time using memcpy.
-         * If a node is a gap (allocated = 0) we add it to the gap index
-         */
+        //traverse and assign one at a time
         while (work_node != NULL) { //(work_node != NULL)
             memcpy(new_heap, work_node, sizeof(node_t));
             
@@ -568,7 +563,7 @@ static alloc_status _mem_resize_node_heap(pool_mgr_pt pool_mgr) {
             new_heap = new_heap->next;
         }
         
-        // update the capacity of the node heap and the head node.
+        // update size of heap and head.
         pool_mgr->total_nodes = pool_mgr->total_nodes * MEM_NODE_HEAP_EXPAND_FACTOR;
         pool_mgr->node_heap = head_node;
     }
@@ -581,7 +576,7 @@ static alloc_status _mem_resize_gap_ix(pool_mgr_pt pool_mgr) {
         pool_mgr->gap_ix = realloc(pool_mgr->gap_ix, (size_t)(pool_mgr->gap_ix_capacity *
                                                                MEM_GAP_IX_EXPAND_FACTOR * sizeof(pool_mgr_pt)));
         pool_mgr->gap_ix_capacity = pool_mgr->gap_ix_capacity * MEM_GAP_IX_EXPAND_FACTOR;
-        printf("Resizing gap index\n");
+        printf("Resized gap index\n");
     }
     return ALLOC_OK;
 }
